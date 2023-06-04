@@ -39,7 +39,7 @@ function [U, Time, A ,xr, V,D] = FEM_Punto2(u,n,x,t,T,dt)
     
     K = M/dt + R + M;
 
-    while tp<=T
+    while tp<T
         b = eval(subs(F,t,tp))+1/dt*M*a0;
         try
             xr = K\b;
@@ -55,5 +55,16 @@ function [U, Time, A ,xr, V,D] = FEM_Punto2(u,n,x,t,T,dt)
         c=c+1;
         a0 = xr;
     end
+
+    b = eval(subs(F,t,tp))+1/dt*M*a0;
+    try
+        xr = K\b;
+    catch
+        [TG,CG,xr,count,E] = GSeidel(K,b,100000,1e-6); 
+    end
+    A(c,:) = xr';
+    Time = [Time tp]; 
+    uh = V*xr;
+    U{c} = uh;
     %Err=sqrt(eval(int((u-Uh).^2,0,1)));
 end
